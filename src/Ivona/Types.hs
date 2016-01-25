@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Ivona.Types where
 
-import Data.ByteString
 import Data.Aeson
 import Data.Monoid
-import qualified Data.Text as T
+import Data.Text (Text)
 import qualified Control.Applicative as A
 
 data SpeechOptions = SpeechOptions {
@@ -20,6 +19,7 @@ instance FromJSON SpeechOptions where
                            v .: "OutputFormat" <*>
                            v .: "Parameters" <*>
                            v .: "Voice"
+    parseJSON _ = A.empty
 
 instance ToJSON SpeechOptions where 
     toJSON (SpeechOptions i o p v) = 
@@ -28,8 +28,8 @@ instance ToJSON SpeechOptions where
         pairs ("Input" .= i <> "OutputFormat" .= o <> "Parameters" .= p <> "Voice" .= v)
 
 data Input = Input {
-      ddata :: String,
-      ttype :: String
+      ddata :: Text,
+      ttype :: Text
 } deriving Show
 
 instance FromJSON Input where
@@ -40,12 +40,12 @@ instance FromJSON Input where
 
 instance ToJSON Input where 
     toJSON (Input d t) = 
-        object ["Data" .= T.pack d, "Type" .= T.pack t]
+        object ["Data" .= d, "Type" .= t]
     toEncoding (Input d t) = 
-        pairs ("Data" .= T.pack d <> "Type" .= T.pack t)
+        pairs ("Data" .= d <> "Type" .= t)
 
 data OutputFormat = OutputFormat {
-      codec :: String,
+      codec :: Text,
       sampleRate :: Int
 } deriving Show
 
@@ -57,13 +57,13 @@ instance FromJSON OutputFormat where
 
 instance ToJSON OutputFormat where 
     toJSON (OutputFormat c s) = 
-        object ["Codec" .= T.pack c, "SampleRate" .= s]
+        object ["Codec" .= c, "SampleRate" .= s]
     toEncoding (OutputFormat c s) = 
-        pairs ("Codec" .= T.pack c <> "SampleRate" .= s)
+        pairs ("Codec" .= c <> "SampleRate" .= s)
 
 data Parameters = Parameters {
-      rate :: String,
-      volume :: String,
+      rate :: Text,
+      volume :: Text,
       sentenceBreak :: Int,
       paragraphBreak :: Int
 } deriving Show
@@ -78,14 +78,14 @@ instance FromJSON Parameters where
 
 instance ToJSON Parameters where
     toJSON (Parameters r v s p) = 
-        object ["Rate" .= T.pack r, "Volume" .= T.pack v, "SentenceBreak" .= s, "ParagraphBreak" .= p]
+        object ["Rate" .= r, "Volume" .= v, "SentenceBreak" .= s, "ParagraphBreak" .= p]
     toEncoding (Parameters r v s p) = 
-        pairs ("Rate" .= T.pack r <> "Volume" .= T.pack v <> "SentenceBreak" .= s <> "ParagraphBreak" .= p)
+        pairs ("Rate" .= r <> "Volume" .= v <> "SentenceBreak" .= s <> "ParagraphBreak" .= p)
 
 data Voice = Voice {
-      name :: String,
-      language :: String,
-      gender :: String
+      name :: Text,
+      language :: Text,
+      gender :: Text
 } deriving Show
 
 instance FromJSON Voice where
@@ -97,11 +97,11 @@ instance FromJSON Voice where
 
 instance ToJSON Voice where
     toJSON (Voice n l g) =
-        object ["Name" .= T.pack n, "Language" .= T.pack l, "Gender" .= T.pack g]
+        object ["Name" .= n, "Language" .= l, "Gender" .= g]
     toEncoding (Voice n l g) = 
-        pairs ("Name" .= T.pack n <> "Language" .= T.pack l <> "Gender" .= T.pack g)
+        pairs ("Name" .= n <> "Language" .= l <> "Gender" .= g)
 
-newSpeechOptions :: String -> SpeechOptions
+newSpeechOptions :: Text -> SpeechOptions
 newSpeechOptions d = SpeechOptions { 
                        input = Input { ddata = d, ttype = "text/plain"},
                        outputFormat = OutputFormat { codec = "MP3", sampleRate = 22050 },

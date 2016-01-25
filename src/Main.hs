@@ -1,7 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import qualified Data.ByteString.Lazy as B
-import           Data.List.Split
+import           Data.Text (Text)
+import qualified Data.Text.IO as TIO
+import qualified Data.Text as T
 import           Ivona
 import           System.Environment
 import           Text.Printf
@@ -9,11 +12,11 @@ import           Text.Printf
 main :: IO ()
 main = do
   [infile, outfile] <- getArgs
-  content <- Prelude.readFile infile
-  let contents = splitOn "\n\n" content
+  content <- TIO.readFile infile
+  let contents = T.splitOn "\n\n" content
   mapSpeech contents outfile 1 
 
-mapSpeech :: [String] -> String -> Int -> IO ()
+mapSpeech :: [Text] -> String -> Int -> IO ()
 mapSpeech [] _ _ = return ()
 mapSpeech (x:xs) outfile n = do
   speech <- createSpeech x
