@@ -27,6 +27,7 @@ executable Ivona
                        wreq,
                        lens,
                        http-client,
+                       http-client-tls,
                        optparse-applicative,
                        formatting
   hs-source-dirs:      src

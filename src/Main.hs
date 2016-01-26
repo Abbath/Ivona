@@ -33,8 +33,11 @@ main = do
   content <- TIO.readFile infile
   let contents = T.splitOn "\n\n" content
   forM_ (zip contents [(1::Int)..]) $ \(x, n) -> do
+         TIO.putStrLn $ sformat ("Paragraph number " % int % " is being processed.") n 
          speech <- createSpeech x
-         B.writeFile (outfile ++ T.unpack (sformat (left 4 '0' %. int) n)) speech
+         let newfilename = outfile ++ T.unpack (sformat ((left 4 '0' %. int) % ".mp3") n)
+         B.writeFile newfilename speech
+         TIO.putStrLn $ sformat ("File " % string % " has been created.") newfilename 
   where opts = info (helper <*> options)
                ( fullDesc
                  <> progDesc "Read INPUTFILE and convert each paragraph to OUTPUTFILE<number>.mp3"
