@@ -27,7 +27,8 @@ executable Ivona
                        wreq,
                        lens,
                        http-client,
-                       split
+                       optparse-applicative,
+                       formatting
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall -Werror
