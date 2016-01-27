@@ -49,10 +49,10 @@ main = do
   then interactive mgr
   else do
     content <- TIO.readFile infile
-    let contents = T.splitOn "\n\n" content
+    let contents = cut $ T.splitOn "\n\n" content
     let len = length contents
     forM_ (zip contents [(1::Int)..len]) $ \(x, n) -> do
-      TIO.putStrLn $ sformat ("The paragraph " % int % "/" % int % " is being processed.") n len
+      TIO.putStrLn $ sformat ("The chunk " % int % "/" % int % " is being processed.") n len
       speech <- createSpeech x mgr
       let newfilename = outfile ++ T.unpack (sformat ((left (length . show $ len) '0' %. int) % ".mp3") n)
       B.writeFile newfilename speech
@@ -62,6 +62,12 @@ main = do
            <> progDesc "Read INPUTFILE and convert each paragraph to OUTPUTPREFIX<number>.mp3"
            <> header "Ivona - program for audiobook from text creation" )
              
+cut :: [T.Text] -> [T.Text]
+cut [] = []
+cut (x:y:xs) | T.length x + T.length y < 8192 = cut (T.append x y : xs)
+cut (x:xs) = x : cut xs  
+
+
 interactive :: HTTPClient.Manager -> IO ()
 interactive mgr = do
   putStr "> "
