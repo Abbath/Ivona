@@ -18,23 +18,23 @@ data FileData = FileData {
       ofile :: String
     } deriving Show
 
-data Options = Options { 
+data Options = Options {
       fdata :: Maybe FileData,
       inter :: Bool
     } deriving Show
 
 options :: Parser Options
 options = Options
-          <$> optional ( FileData 
-              <$> strOption 
-                 (  long "input-file" 
-                 <> short 'i' 
-                 <> metavar "INPUTFILE" 
+          <$> optional ( FileData
+              <$> strOption
+                 (  long "input-file"
+                 <> short 'i'
+                 <> metavar "INPUTFILE"
                  <> help "Input file")
-              <*> strOption 
-                  (  long "output-file-prefix" 
-                  <> short 'o' 
-                  <> metavar "OUTPUTPREFIX" 
+              <*> strOption
+                  (  long "output-file-prefix"
+                  <> short 'o'
+                  <> metavar "OUTPUTPREFIX"
                   <> help "Output file name prefix") )
           <*> switch
                   (  long "interactive"
@@ -45,7 +45,7 @@ main = do
   Options a intr <- execParser opts
   let (infile, outfile) = if intr then ("","") else (\(Just (FileData i o)) -> (i,o)) a
   mgr <- HTTPClient.newManager HTTPClientTLS.tlsManagerSettings
-  if intr 
+  if intr
   then interactive mgr
   else do
     content <- TIO.readFile infile
@@ -56,17 +56,16 @@ main = do
       speech <- createSpeech x mgr
       let newfilename = outfile ++ T.unpack (sformat ((left (length . show $ len) '0' %. int) % ".mp3") n)
       B.writeFile newfilename speech
-      TIO.putStrLn $ sformat ("The file " % string % " has been created.") newfilename 
+      TIO.putStrLn $ sformat ("The file " % string % " has been created.") newfilename
   where opts = info (helper <*> options)
            ( fullDesc
            <> progDesc "Read INPUTFILE and convert each paragraph to OUTPUTPREFIX<number>.mp3"
            <> header "Ivona - program for audiobook from text creation" )
-             
+
 cut :: [T.Text] -> [T.Text]
 cut [] = []
 cut (x:y:xs) | T.length x + T.length y < 8192 = cut (T.append x y : xs)
-cut (x:xs) = x : cut xs  
-
+cut (x:xs) = x : cut xs
 
 interactive :: HTTPClient.Manager -> IO ()
 interactive mgr = do
@@ -75,6 +74,6 @@ interactive mgr = do
   s <- TIO.getLine
   speech <- createSpeech s mgr
   B.writeFile "lastphrase.mp3" speech
-  _ <- system $ "mplayer lastphrase.mp3 &> /dev/null"
+  h <- openFile "/dev/null" WriteMode
+  _ <- createProcess (shell "mplayer lastphrase.mp3") { std_out = UseHandle h, std_err = UseHandle h}
   interactive mgr
-  
